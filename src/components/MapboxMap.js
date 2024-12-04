@@ -13,10 +13,13 @@ const MapboxMap = () => {
   useEffect(() => {
     const fetchVehicles = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/show`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/show`, {
+          cache: "no-cache",
+        });
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setVehicles(data);
-
         if (data.length > 0) {
           setViewport({
             latitude: data[0].latitude,
@@ -31,6 +34,16 @@ const MapboxMap = () => {
 
     fetchVehicles();
   }, []);
+
+  useEffect(() => {
+    if (vehicles.length > 0) {
+      setViewport((prevViewport) => ({
+        ...prevViewport,
+        latitude: vehicles[0].latitude,
+        longitude: vehicles[0].longitude,
+      }));
+    }
+  }, [vehicles]);
 
   return (
     <div style={{ height: "100vh", width: "100%" }}>
